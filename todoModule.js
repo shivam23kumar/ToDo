@@ -1,15 +1,27 @@
-(function(){
+var TodoListApp =(function(){
     let tasks = [];
     const tasksList = document.getElementById('list');
     const addTaskInput = document.getElementById('add');
     const tasksCounter = document.getElementById('tasks-counter');
 
+async function fetchToDos() {
+    try{
+        const response = await fetch('https://jsonplaceholder.typicode.com/todos');
+        const data = await response.json();
+        tasks = data.slice(0,10);
+        renderList();
+    }catch(error){
+        console.log(error);
+    }
+    
+    
+}
 function addTaskToDOM(task) {
     const li = document.createElement('li');
 
     li.innerHTML = `
-        <input type="checkbox" id="${task.id}" ${task.done ? 'checked' : ''} class="custom-checkbox">
-        <label for="${task.id}">${task.text}</label>
+        <input type="checkbox" id="${task.id}" ${task.completed ? 'checked' : ''} class="custom-checkbox">
+        <label for="${task.id}">${task.title}</label>
         <img src="bin.svg" class="delete" data-id="${task.id}" />
     `;
     tasksList.append(li);
@@ -25,20 +37,20 @@ function renderList(){
 
 };
 
-function toggleTask(taskId){
-    const task = tasks.filter(function(task){
-        task.id === taskId;
-    })
+// function toggleTask(taskId){
+//     const task = tasks.filter(function(task){
+//         task.id === taskId;
+//     })
 
-    if(task.length>0){
-        const currentTask = task[0];
-        currentTask.done = !currentTask.done;
-        renderList();
-        showNotification('Task toggled successfully');
-        return;
-    }
-    showNotification('Task did not toggled successfully');
-}
+//     if(task.length>0){
+//         const currentTask = task[0];
+//         currentTask.completed = !currentTask.completed;
+//         renderList();
+//         showNotification('Task toggled successfully');
+//         return;
+//     }
+//     showNotification('Task did not toggled successfully');
+// }
 
 function deleteTask(taskId) {
     const newTasks = tasks.filter(function(task){
@@ -72,9 +84,9 @@ function handleInputKeypress(e){
             return;
         }
         const task = {
-            text,
+            title : text,
             id: Date.now().toString(),
-            done:false
+            completed:false
         }
         e.target.value='';
         addTask(task);
@@ -92,18 +104,20 @@ function handleClickListener(e) {
     }
     else if(target.className === 'custom-checkbox'){
         const taskId = target.id;
-        toggleTask(taskId);
+        //toggleTask(taskId);
         return;
     }
 }
 
 
-function intialiseApp() {
-    
+function initialiseApp() {
+    fetchToDos();
     addTaskInput.addEventListener('keyup', handleInputKeypress);
-
     document.addEventListener('click', handleClickListener);
 }
-intialiseApp();
+return{
+    initialise:initialiseApp
+}
+
 
 })();
